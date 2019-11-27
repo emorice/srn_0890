@@ -1,0 +1,4 @@
+wheel
+snakemake
+pandas
+biopython
