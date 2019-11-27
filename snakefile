@@ -4,7 +4,15 @@ import Bio.SeqIO as SeqIO
 
 rule all:
     input:
-        'matches.cmc.results.txt'
+        'matches.cmc.results.txt', # seed
+        'matches.cmc.results.msa.pdf', # seed ss
+        'matches.locarna/results/result.stk.pdf' # pre-seed ss
+    shell:
+        """
+        ln -s {input[1]} seed_ss.pdf
+        ln -s {input[2]} preseed_ss.pdf
+        """
+
 
 rule rep_seqs:
     output:
@@ -209,3 +217,17 @@ rule cmbuild:
         """
         infernal-1.1.3-linux-intel-gcc/binaries/cmbuild {output} 'matches.locarna/results/result.stk'
         """
+rule plot_alignment:
+    input:
+        'vienna/bin/RNAplot',
+        '{msa}'
+    output:
+        '{msa}.pdf'
+    shell:
+        """
+        vienna/bin/RNAplot -a {wildcards.msa} --covar --auto-id --id-prefix=ss
+        mv ss_0001_ss.ps {wildcards.msa}.ps
+        ps2eps -f {wildcards.msa}.ps
+        epstopdf {wildcards.msa}.eps
+        """
+	
